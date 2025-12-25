@@ -1,0 +1,19 @@
+llm:
+  provider: openai
+  base_url: https://api.openai.com/v1
+  model: gpt-4.1-mini
+  api_key_env: OPENAI_API_KEY
+  temperature: 0.0
+  timeout: 30
+  stream: false
+  model_params:
+    # Default model/request params applied to all LLM calls; can be overridden per-call
+    max_tokens: 512
+    top_p: 1.0
+    n: 1
+
+embedding:
+  model: all-MiniLM-L6-v2
+
+nli:
+  model: facebook/bart-large-mnli

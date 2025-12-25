@@ -1,0 +1,18 @@
+evaluators:
+  semantic:
+    methods:
+      embedding: 1.0
+      bertscore: 1.0
+      rouge_1: 1.0
+      rouge_l: 1.0
+
+  contradiction:
+    methods:
+      nli_bart: 1.0
+
+  llm_judge:
+    methods:
+      judge_coverage: 1.0
+      judge_faithfulness: 1.0
+      judge_clarity: 1.0
+      judge_coherence: 1.0
