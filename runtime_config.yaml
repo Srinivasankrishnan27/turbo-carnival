@@ -1,0 +1,39 @@
+embedding:
+  base_url: "https://generativelanguage.googleapis.com/v1beta/openai/"
+  api_key : "${OPENAI_API_KEY}"
+  embedding_model_name: "gemini-embedding-001"
+
+coverage: 
+  base_url: "https://generativelanguage.googleapis.com/v1beta/openai/"
+  api_key : "${OPENAI_API_KEY}"
+  model_name: "gemini-2.5-flash"
+  stream: False
+
+faithfulness:
+  base_url: "https://generativelanguage.googleapis.com/v1beta/openai/"
+  api_key : "${OPENAI_API_KEY}"
+  model_name: "gemini-2.5-flash"
+  stream: False
+
+clarity: 
+  base_url: "https://generativelanguage.googleapis.com/v1beta/openai/"
+  api_key : "${OPENAI_API_KEY}"
+  model_name: "gemini-2.5-flash"
+  stream: False
+
+coherence: 
+  base_url: "https://generativelanguage.googleapis.com/v1beta/openai/"
+  api_key : "${OPENAI_API_KEY}"
+  model_name: "gemini-2.5-flash"
+  stream: False
+
+relevance: 
+  base_url: "https://generativelanguage.googleapis.com/v1beta/openai/"
+  api_key : "${OPENAI_API_KEY}"
+  model_name: "gemini-2.5-flash"
+  stream: False
+
+rouge1: {}
+rouge2: {}
+rougeL: {}
+rougeLsum: {}

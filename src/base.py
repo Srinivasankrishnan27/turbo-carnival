@@ -2,15 +2,14 @@ from abc import ABC, abstractmethod
 
 
 class BaseEvaluator(ABC):
+
+    def __init__(self, **kwargs):
+          self.runtime_kwargs = kwargs
+
     @abstractmethod
     async def evaluate(self, ground_truth: str, candidate: str, **kwargs):
             """Evaluate a (generated, reference) pair.
-
             Must return a mapping with at least:
-                - "method": str
-                - "score": float
-            Optionally include:
-                - "explanation": str  # human-readable justification
-            Example: {"method": "bertscore", "score": 0.82, "explanation": "F1 between texts"}
+            Example: {"score": 0.85, "comment": "some comments"}
             """
-            pass
+            raise NotImplementedError("Each evaluator must implement the evaluate method")

@@ -1,5 +1,5 @@
 from transformers import pipeline
-from src.evaluators.base import BaseEvaluator
+from src.base import BaseEvaluator
 from src.utils.timeit import timeit
 
 

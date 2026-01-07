@@ -1,70 +1,73 @@
 import asyncio
-from config.loader import ConfigLoader
-from evaluators.aggregator import Aggregator
-from evaluators.registry import build_registry
-from src.utils.logging_config import get_logger
+import traceback
 
-logger = get_logger(__name__)
+import yaml
 
+from src.aggregator import Aggregator
+from src.registry import REGISTRY
+from src.runtime_config import load_runtime_config
+import src.evaluators
 
-async def run_evaluator(name, evaluator, generated, reference, timeout=30):
-    try:
-        result = await asyncio.wait_for(
-            evaluator.evaluate(generated, reference),
-            timeout=timeout
-        )
-        return name, result
-    except Exception:
-        logger.exception("%s failed", name)
-        return name, None
+async def run_pipeline(ground_truth: str, candidate: str, config_path: str, runtime_config_path: str):
+    with open(config_path, "r") as f:
+        eval_config = yaml.safe_load(f)
+    
+    runtime_cfg = load_runtime_config(runtime_config_path)
 
+    results = {}
 
-async def run_pipeline(generated, reference):
-    loader = ConfigLoader("evaluation.yaml", "runtime.yaml")
-    registry = build_registry(loader.runtime_config, loader)
+    async def evaluate_method(category: str, method: str, weight: float):
+        
+        kwargs = runtime_cfg.get(method, {})
+        evaluator = REGISTRY.get(category, method, **kwargs)
+        
+        if evaluator is None:
+            print(f"[WARN] Evaluator '{category}'.'{method}' not registered - Skipping")
+            return method, None, weight
+        
+        try:
+            result = await evaluator.evaluate(ground_truth, candidate)
+            return method, result, weight
+        except Exception as e:
+            print(f"[ERROR] Failed to evaluate '{category}'.'{method}': Error: {str(e)} - Skipping")
+            return method, None, weight
+    
+    layer_tasks = []
 
-    output = {}
-
-    # No global validation here; unknown methods will be logged per-layer and skipped.
-
-    for layer, cfg in loader.eval_config.get("evaluators", {}).items():
-        methods = cfg.get("methods")
-        if not methods:
-            logger.warning("Layer '%s' has no methods", layer)
+    for category, methods in eval_config.get("evaluators", {}).items():
+        if not isinstance(methods, dict):
+            print(f"[WARN] methods for {category} is not a dict - Skipping")
             continue
-
         tasks = []
-        for method in methods:
-            if method not in registry:
-                logger.warning(
-                    "Method '%s' not registered; add it in src/evaluators/registry.py as a zero-arg factory or add a prompt in src/evaluation_prompts.yaml",
-                    method,
-                )
+        for method, weight in methods.items():
+            weight = weight if weight is not None else 1.0
+            tasks.append(evaluate_method(category, method, weight))
+        layer_tasks.append((category, tasks))
+
+    
+    # Run all the layers concurrently 
+
+    all_layer_results = await asyncio.gather(*[asyncio.gather(*tasks, return_exceptions=False) for _, tasks in layer_tasks])
+
+    # collect results
+
+    for (category, _), layer_results in zip(layer_tasks, all_layer_results):
+        scores = {}
+        weights = {}
+        for method, result, weight in layer_results:
+            if result is None:
                 continue
+            scores[method] = result
+            weights[method] = weight
 
-            evaluator = registry[method]()
-            tasks.append(run_evaluator(method, evaluator, generated, reference))
-
-        # 🔥 Parallel execution per layer
-        results = await asyncio.gather(*tasks)
-
-        # `results` is a list of (method_name, result_dict)
-        evaluator_outputs = {k: v for k, v in results if v is not None}
-
-        # Build numeric score mapping for aggregation
-        numeric_scores = {k: v.get("score", 0.0) for k, v in evaluator_outputs.items()}
-
-        output[layer] = {
-            "final_score": Aggregator.aggregate(numeric_scores, methods),
-            "evaluators": evaluator_outputs,
-            "weights": methods,
-        }
-
-    return output
-
-
-if __name__ == "__main__":
-    result = asyncio.run(
-        run_pipeline("Generated text", "Reference text")
-    )
-    logger.info("Pipeline result: %s", result)
+            if not scores:
+                print(f"[INFO] No valid results for the category: {category}")
+                continue
+            final_score = Aggregator.aggregate({k: v["score"] for k, v in scores.items()}, weights)
+            
+            results[category] = {
+                "final_score": final_score, 
+                "evaluators": scores, 
+                "weights" : weights
+            }
+    return results    
