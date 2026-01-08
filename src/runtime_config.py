@@ -1,10 +1,11 @@
 import os
 import yaml
 
+
 def load_runtime_config(path: str) -> dict:
     with open(path, "r") as f:
         raw = yaml.safe_load(f)
-    
+
     def resolve_env(value):
         if isinstance(value, str) and value.startswith("${") and value.endswith("}"):
             return os.getenv(value[2:-1])
@@ -18,4 +19,3 @@ def load_runtime_config(path: str) -> dict:
         return resolve_env(obj)
 
     return walk(raw)
-        

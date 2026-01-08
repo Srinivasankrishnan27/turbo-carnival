@@ -6,11 +6,14 @@ from src.utils.timeit import timeit
 
 SUPPORTED_ROUGE_TYPE = ["rouge1", "rouge2", "rougeL", "rougeLsum"]
 
+
 class RougeEvaluator(BaseEvaluator):
     def __init__(self, rouge_type: str, **kwargs):
         super().__init__(**kwargs)
         if rouge_type not in SUPPORTED_ROUGE_TYPE:
-            raise ValueError(f"Invalid ROUGE type. Supported types are: {SUPPORTED_ROUGE_TYPE}")
+            raise ValueError(
+                f"Invalid ROUGE type. Supported types are: {SUPPORTED_ROUGE_TYPE}"
+            )
         self.rouge_type = rouge_type
         self.scorer = rouge_scorer.RougeScorer([rouge_type], use_stemmer=True)
 
@@ -27,6 +30,8 @@ class RougeEvaluator(BaseEvaluator):
 
 
 for rouge_type in SUPPORTED_ROUGE_TYPE:
+
     def factory(rt=rouge_type, **kwargs):
         return RougeEvaluator(rt, **kwargs)
+
     register_evaluator(category="ngram", name=rouge_type)(factory)

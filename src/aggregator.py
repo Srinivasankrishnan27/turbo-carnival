@@ -12,9 +12,8 @@ class Aggregator:
             weight = weights.get(name, 1.0)
             total += score * weight
             total_weight += weight
-        
+
         if total_weight == 0:
             return 0.0
 
-
-        return round(total / total_weight , 4)
+        return round(total / total_weight, 4)
