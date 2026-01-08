@@ -1,4 +1,5 @@
 import logging
+import asyncio
 import httpx
 from openai import AsyncOpenAI, RateLimitError
 from litellm import aembedding
@@ -81,7 +82,7 @@ class EmbeddingSimilarityEvaluator(BaseEvaluator):
         retry=retry_if_exception_type(RateLimitError)
     )
     async def get_embeddings(self, doc):
-        chunks = self._recursive_split(doc)
+        chunks = await asyncio.to_thread(self._recursive_split, doc)
         embeddings = []
         for chunk in chunks:
             response = await self.__openai_client.embeddings.create(
