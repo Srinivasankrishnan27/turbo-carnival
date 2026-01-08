@@ -1,3 +1,4 @@
+from src.utils.timeit import timeit
 import logging
 import asyncio
 import httpx
@@ -104,6 +105,7 @@ class EmbeddingSimilarityEvaluator(BaseEvaluator):
     async def dot_product(self, vec1, vec2):
         return sum(x * y for x, y in zip(vec1, vec2))
     
+    @timeit
     async def evaluate(self, ground_truth, candidate, **kwargs):
         score = 0
         try:

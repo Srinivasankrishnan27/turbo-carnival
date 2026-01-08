@@ -1,6 +1,7 @@
 from src.base import BaseEvaluator
 from src.registry_decorator import register_evaluator
 from src.evaluators.llm_judge.data_model import LLMJudgeEvaluatorOuput
+from src.utils.timeit import timeit
 import json
 import httpx
 import yaml
@@ -107,6 +108,7 @@ class LLMJudgeDimensionEvaluator(BaseEvaluator):
         return prompt
     
 
+    @timeit
     async def evaluate(self, ground_truth: str, candidate: str, **kwargs):        
         full_prompt = self.build_prompt(ground_truth, candidate)
         result = await self.call_llm(full_prompt, **kwargs)

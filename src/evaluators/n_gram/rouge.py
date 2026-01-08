@@ -2,6 +2,7 @@ from rouge_score import rouge_scorer
 
 from src.base import BaseEvaluator
 from src.registry_decorator import register_evaluator
+from src.utils.timeit import timeit
 
 SUPPORTED_ROUGE_TYPE = ["rouge1", "rouge2", "rougeL", "rougeLsum"]
 
@@ -13,6 +14,7 @@ class RougeEvaluator(BaseEvaluator):
         self.rouge_type = rouge_type
         self.scorer = rouge_scorer.RougeScorer([rouge_type], use_stemmer=True)
 
+    @timeit
     async def evaluate(self, ground_truth: str, candidate: str, **kwargs):
         scores = self.scorer.score(ground_truth, candidate)
         score = scores[self.rouge_type].fmeasure
