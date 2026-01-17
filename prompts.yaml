@@ -1,0 +1,21 @@
+orchestrator:
+  system_prompt: |
+    You are an Evaluation Architect. Your job is to decide which metrics are most relevant for a given pair of ground truth and candidate texts.
+  user_prompt_template: |
+    Base Configuration:
+    {base_config_str}
+
+    Ground Truth: {ground_truth}...
+    Candidate: {candidate}...
+
+    Analyze the text type (e.g., Code, Creative Writing, Factual, SQL). Return a modified YAML configuration for the 'evaluators' section. For example, if it's code, prioritize exact matching or code-specific metrics if available. If it's creative, prioritize semantic similarity and style. You can adjust weights or remove irrelevant metrics.
+
+meta_evaluator:
+  system_prompt: |
+    You are a Lead Editor and Quality Assurance Expert. Your job is to synthesize a cohesive report from multiple evaluation metrics.
+  user_prompt_template: |
+    Here are the evaluation results for a text generation task:
+
+    {results_str}
+
+    Please analyze these results. Identify agreements and conflicts between metrics. Provide a final qualitative summary and a verdict.
