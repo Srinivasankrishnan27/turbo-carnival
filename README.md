@@ -183,12 +183,6 @@ agent_config:
 
 The pipeline now supports an **agentic mode** that uses LLMs to dynamically plan the evaluation and synthesize the results.
 
-### Dependencies
-
-```bash
-pip install -r requirements_agentic.txt
-```
-
 ### Execution
 
 To run the agentic pipeline, use the `main.py` script with the `--agentic` flag:
@@ -217,8 +211,9 @@ This project integrates [pydantic-logfire](https://github.com/pydantic/logfire) 
 **Setup**:
 1. Run `logfire auth` to authenticate.
 2. The pipeline will automatically verify your session. 
-3. If not authenticated, the pipeline will run without tracing (graceful fallback).
-
+**Benefits**:
+- Visualize execution traces.
+- Inspect full prompt/response payloads.
 - Debug latency and errors in real-time.
 
 ## Key Features
