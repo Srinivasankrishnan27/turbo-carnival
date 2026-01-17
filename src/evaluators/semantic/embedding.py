@@ -16,6 +16,8 @@ from src.registry_decorator import register_evaluator
 import traceback
 
 
+from src.chunker import Chunker
+
 @register_evaluator(category="semantic", name="embedding")
 class EmbeddingSimilarityEvaluator(BaseEvaluator):
     MAX_RETRIES = 3
@@ -35,57 +37,12 @@ class EmbeddingSimilarityEvaluator(BaseEvaluator):
             http_client=self.__async_client,
         )
         self.__model_name = {self.__embedding_model_name}
+        # Initialize Chunking with default of 8000 chars as per original code
+        self.chunker = Chunker(chunk_size=8000)
 
     @property
     def method_name(self):
         return "embedding"
-
-    def _recursive_split(self, text: str, max_chars: int = 8000) -> list:
-        separators = ["\n\n", "\n", " ", ""]
-
-        def split(text, separators):
-            if len(text) <= max_chars:
-                return [text]
-
-            if not separators:
-                return [text[i : i + max_chars] for i in range(0, len(text), max_chars)]
-
-            separator = separators[0]
-            next_separators = separators[1:]
-
-            if separator == "":
-                return [text[i : i + max_chars] for i in range(0, len(text), max_chars)]
-
-            items = text.split(separator)
-            chunks = []
-            current_chunk = []
-            current_len = 0
-
-            for item in items:
-                if (
-                    current_len + len(item) + (len(separator) if current_chunk else 0)
-                    <= max_chars
-                ):
-                    current_chunk.append(item)
-                    current_len += len(item) + (len(separator) if current_chunk else 0)
-                else:
-                    if current_chunk:
-                        chunks.append(separator.join(current_chunk))
-                        current_chunk = []
-                        current_len = 0
-
-                    if len(item) > max_chars:
-                        chunks.extend(split(item, next_separators))
-                    else:
-                        current_chunk.append(item)
-                        current_len = len(item)
-
-            if current_chunk:
-                chunks.append(separator.join(current_chunk))
-
-            return chunks
-
-        return split(text, separators)
 
     @retry(
         stop=stop_after_attempt(MAX_RETRIES),
@@ -93,7 +50,8 @@ class EmbeddingSimilarityEvaluator(BaseEvaluator):
         retry=retry_if_exception_type(RateLimitError),
     )
     async def get_embeddings(self, doc):
-        chunks = await asyncio.to_thread(self._recursive_split, doc)
+        # Use shared Chunker
+        chunks = await asyncio.to_thread(self.chunker.chunk_text, doc)
         embeddings = []
         for chunk in chunks:
             response = await self.__openai_client.embeddings.create(
