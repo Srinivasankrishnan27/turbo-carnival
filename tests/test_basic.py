@@ -58,7 +58,9 @@ def test_orchestrator_init():
          patch("yaml.safe_load", return_value={"orchestrator": {"system_prompt": "sys", "user_prompt_template": "usr"}}):
         
         from src.orchestrator import Orchestrator
-        # Mock AsyncOpenAI to avoid actual connection
-        with patch("src.orchestrator.AsyncOpenAI"):
-            orch = Orchestrator(base_url="http://test", api_key="test", model_name="gpt-4")
-            assert orch.agent is not None
+        # Mocking Agent if needed, but for init check just ensuring no crash
+        try:
+             orch = Orchestrator(base_url="http://test", api_key="test", model_name="gpt-4")
+             assert orch.agent is not None
+        except Exception as e:
+             pytest.fail(f"Orchestrator init failed: {e}")
