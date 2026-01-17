@@ -60,11 +60,10 @@ class LLMJudgeDimensionEvaluator(BaseEvaluator):
     async def ask_model_openai(
         self, messages, model_params=None, raise_truncation_exception=False, **kwargs
     ):
-        completion = await self.__client.chat.completions.parse(
+        completion = await self.__client.chat.completions.create(
             model=self.__model_name,
             messages=messages,
-            # stream_options=self.__stream,
-            response_format=LLMJudgeEvaluatorOuput,
+            response_format={"type": "json_object"},
         )
         if self.__stream:
             stream_text, has_stop = await self.process_stream(completion)
@@ -88,6 +87,20 @@ class LLMJudgeDimensionEvaluator(BaseEvaluator):
 
     async def call_llm(self, prompt, **kwargs):
         json_schema = LLMJudgeEvaluatorOuput.model_json_schema()
+        
+        # Inject schema into the system prompt or as a new system message
+        schema_instruction = f"\n\nYou must output a JSON object adhering to this schema:\n{json.dumps(json_schema, indent=2)}"
+        
+        # Find system prompt and append, or add new one
+        system_msg_found = False
+        for msg in prompt:
+            if msg["role"] == "system":
+                msg["content"] += schema_instruction
+                system_msg_found = True
+                break
+        if not system_msg_found:
+             prompt.insert(0, {"role": "system", "content": schema_instruction})
+
         model_params = {"response_json_schema": json_schema}
         response = await self.ask_model_openai(
             messages=prompt, model_params=model_params, **kwargs
