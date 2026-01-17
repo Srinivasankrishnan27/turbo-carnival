@@ -4,36 +4,41 @@ embedding:
   embedding_model_name: "gemini-embedding-001"
 
 coverage: 
-  base_url: "https://generativelanguage.googleapis.com/v1beta/openai/"
-  api_key : "${OPENAI_API_KEY}"
-  model_name: "gemini-2.5-flash"
+  base_url: "https://api.deepseek.com"
+  api_key : "${DEEPSEEK_API_KEY}"
+  model_name: "deepseek-reasoner"
   stream: False
 
 faithfulness:
-  base_url: "https://generativelanguage.googleapis.com/v1beta/openai/"
-  api_key : "${OPENAI_API_KEY}"
-  model_name: "gemini-2.5-flash"
+  base_url: "https://api.deepseek.com"
+  api_key : "${DEEPSEEK_API_KEY}"
+  model_name: "deepseek-reasoner"
   stream: False
 
 clarity: 
-  base_url: "https://generativelanguage.googleapis.com/v1beta/openai/"
-  api_key : "${OPENAI_API_KEY}"
-  model_name: "gemini-2.5-flash"
+  base_url: "https://api.deepseek.com"
+  api_key : "${DEEPSEEK_API_KEY}"
+  model_name: "deepseek-reasoner"
   stream: False
 
 coherence: 
-  base_url: "https://generativelanguage.googleapis.com/v1beta/openai/"
-  api_key : "${OPENAI_API_KEY}"
-  model_name: "gemini-2.5-flash"
+  base_url: "https://api.deepseek.com"
+  api_key : "${DEEPSEEK_API_KEY}"
+  model_name: "deepseek-reasoner"
   stream: False
 
 relevance: 
-  base_url: "https://generativelanguage.googleapis.com/v1beta/openai/"
-  api_key : "${OPENAI_API_KEY}"
-  model_name: "gemini-2.5-flash"
+  base_url: "https://api.deepseek.com"
+  api_key : "${DEEPSEEK_API_KEY}"
+  model_name: "deepseek-reasoner"
   stream: False
 
 rouge1: {}
 rouge2: {}
 rougeL: {}
 rougeLsum: {}
+
+agent_config:
+  base_url: "https://api.deepseek.com"
+  api_key : "${DEEPSEEK_API_KEY}" # Or "${GOOGLE_API_KEY}" or "${OPENAI_API_KEY}"
+  model_name: "deepseek:deepseek-chat"

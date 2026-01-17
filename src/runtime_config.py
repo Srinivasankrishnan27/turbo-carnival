@@ -1,5 +1,8 @@
 import os
 import yaml
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 def load_runtime_config(path: str) -> dict:
