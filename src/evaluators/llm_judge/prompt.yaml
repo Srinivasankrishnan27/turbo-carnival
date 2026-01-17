@@ -43,8 +43,9 @@ dimensions:
       -----------------
       {generated}
       -----------------
-      Evaluate factual accuracy of the generated text against the reference.
-      Score from 0.0 (completely unfaithful) to 1.0 (fully faithful).
+      Evaluate factual accuracy of the generated text STRICTLY against the reference.
+      Do not use external knowledge. If the generated text contains claims not present in or supported by the reference, penalize the score.
+      Score from 0.0 (completely unfaithful/hallucinated) to 1.0 (fully faithful).
       Return JSON: {"score": <float>, "comment": "<reasoning>"}
     few_shot_examples:
       - reference: "The cat sat on the mat."

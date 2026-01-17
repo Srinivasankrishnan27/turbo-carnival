@@ -10,8 +10,11 @@ import src.evaluators
 
 
 async def run_pipeline(
-    ground_truth: str, candidate: str, config_path: str, runtime_config_path: str
+    ground_truth: str, candidate: str, config_path: str, runtime_config_path: str, use_cache: bool = True, project_name: str = "default"
 ):
+    from src.utils.cache import CacheManager
+    cache = CacheManager(project_name=project_name, enabled=use_cache)
+
     with open(config_path, "r") as f:
         eval_config = yaml.safe_load(f)
 
@@ -29,7 +32,17 @@ async def run_pipeline(
             return method, None, weight
 
         try:
+            # CHECK CACHE
+            cached_result = cache.get(evaluator.method_name, ground_truth, candidate, kwargs)
+            if cached_result:
+                print(f"[CACHE] Hit for {method}")
+                return method, cached_result, weight
+
             result = await evaluator.evaluate(ground_truth, candidate)
+            
+            # SET CACHE
+            cache.set(evaluator.method_name, ground_truth, candidate, kwargs, result)
+            
             return method, result, weight
         except Exception as e:
             print(

@@ -116,14 +116,20 @@ cp .env.example .env
 ```
 
 ### Execution
-
 To run the pipeline, execute the `main.py` script:
-
 ```bash
+# Basic Run
 python main.py
-```
 
-This will run the evaluation on the sample texts defined in `main.py` using the evaluators specified in `config.yaml`.
+# With HTML Report and Project Isolation
+python main.py --report --project_name my_project_A
+
+# With Agentic Mode
+python main.py --agentic --report
+
+# Batch Processing (JSONL or JSON Array)
+python main.py --input_file data/sample_batch.json --output_file results.json --report
+```
 
 ## Configuration
 
@@ -213,10 +219,23 @@ This project integrates [pydantic-logfire](https://github.com/pydantic/logfire) 
 2. The pipeline will automatically verify your session. 
 3. If not authenticated, the pipeline will run without tracing (graceful fallback).
 
-**Benefits**:
-- Visualize execution traces.
-- Inspect full prompt/response payloads.
 - Debug latency and errors in real-time.
+
+## Key Features
+
+### 1. Robust Caching (`--project_name`)
+The pipeline uses SQLite-based caching to prevent re-evaluating identical inputs. 
+- **Isolation**: Use `--project_name <name>` to create separate cache databases (e.g., `.cache_<name>.db`) for different experiments.
+- **Control**: Disable caching with `--no_cache`.
+
+### 2. HTML Reporting (`--report`)
+Generate beautiful, standalone HTML reports alongside your JSON output.
+- **Dashboard**: Global scores and layer-level performance.
+- **Visuals**: Interactive bar charts and color-coded indicators.
+- **Detail View**: Sortable table comparing Ground Truth vs Candidate.
+
+### 3. Flexible Input
+Support for both **JSONL** (Line-delimited JSON) and **JSON Array** formats.
 
 ## Output Format
 

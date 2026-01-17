@@ -6,6 +6,7 @@ import yaml
 
 from src.pipeline import run_pipeline
 from src.runtime_config import load_runtime_config
+from src.dataset import Dataset
 
 from pydantic_evals.evaluators import LLMJudge
 
@@ -39,6 +40,8 @@ async def process_single_pair(
     config_path,
     runtime_config_path,
     use_agentic=False,
+    use_cache=True,
+    project_name="default",
 ):
     print(
         f"\n--- Processing Pair ---\nGT: {ground_truth[:50]}...\nCand: {candidate[:50]}..."
@@ -103,7 +106,7 @@ async def process_single_pair(
     results = {}
     try:
         results = await run_pipeline(
-            ground_truth, candidate, active_config_path, runtime_config_path
+            ground_truth, candidate, active_config_path, runtime_config_path, use_cache=use_cache, project_name=project_name
         )
     except Exception as e:
          print(f"[ERROR] Pipeline execution failed: {e}")
@@ -147,6 +150,15 @@ async def main():
     parser.add_argument(
         "--agentic", action="store_true", help="Enable agentic evaluation (Planning & Synthesis)"
     )
+    parser.add_argument(
+        "--no_cache", action="store_true", help="Disable caching of evaluation results"
+    )
+    parser.add_argument(
+        "--project_name", type=str, default="default", help="Project identifier for caching isolation"
+    )
+    parser.add_argument(
+        "--report", action="store_true", help="Generate HTML report"
+    )
     args = parser.parse_args()
 
     # 1. Setup paths
@@ -162,14 +174,15 @@ async def main():
 
     # 3. Prepare Inputs
     inputs = []
+    # 3. Prepare Inputs
+    inputs = []
     if args.input_file:
-        if not os.path.exists(args.input_file):
-             print(f"[ERROR] Input file not found: {args.input_file}")
+         try:
+             dataset = Dataset.load(args.input_file)
+             inputs = [item.model_dump() for item in dataset]
+         except Exception as e:
+             print(f"[ERROR] Failed to load dataset: {e}")
              return
-        with open(args.input_file, "r") as f:
-            for line in f:
-                if line.strip():
-                    inputs.append(json.loads(line))
     else:
         # Default example if no input file
         print("[INFO] No input file provided. Using default example.")
@@ -177,6 +190,7 @@ async def main():
             {
                 "ground_truth": "The Apollo 11 mission successfully landed humans on the Moon on July 20, 1969.",
                 "candidate": "Humans landed on the Moon for the first time on July 20, 1969, during the successful Apollo 11 mission.",
+                "id": "default-001"
             }
         )
 
@@ -200,6 +214,8 @@ async def main():
             config_path,
             runtime_config_path,
             use_agentic=args.agentic,
+            use_cache=not args.no_cache,
+            project_name=args.project_name
         )
         if res:
             res["input"] = item
@@ -210,6 +226,16 @@ async def main():
         with open(args.output_file, "w") as f:
             json.dump(results_list, f, indent=2)
         print(f"\n[Done] Results saved to {args.output_file}")
+        
+        # 5. HTML Report
+        if args.report:
+             try:
+                 from src.reporting import HTMLReportGenerator
+                 report_path = args.output_file.replace(".jsonl", "").replace(".json", "") + "_report.html"
+                 HTMLReportGenerator.generate_report(results_list, report_path, args.project_name)
+             except Exception as e:
+                 print(f"[WARN] Failed to generate HTML report: {e}")
+
     else:
         print("\n--- Final JSON Output ---")
         print(json.dumps(results_list[0], indent=2))
