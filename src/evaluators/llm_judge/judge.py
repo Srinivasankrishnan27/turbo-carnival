@@ -14,9 +14,15 @@ from tenacity import (
     retry_if_exception_type,
 )
 
-prompt_path = os.path.join(os.path.dirname(__file__), "prompt.yaml")
-with open(prompt_path, "r") as f:
-    PROMPT_CFG = yaml.safe_load(f)
+# Resolve path to prompts.yaml at project root
+# internal path: src/evaluators/llm_judge/judge.py
+# target: prompts.yaml
+base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+prompt_path = os.path.join(base_dir, "prompts.yaml")
+
+with open(prompt_path, "r", encoding="utf-8") as f:
+    ALL_PROMPTS = yaml.safe_load(f)
+    PROMPT_CFG = ALL_PROMPTS.get("llm_judge", {})
 
 SYSTEM_PROMPT = PROMPT_CFG["system_prompt"]
 DIMENSIONS = list(PROMPT_CFG["dimensions"].keys())

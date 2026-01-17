@@ -19,3 +19,109 @@ meta_evaluator:
     {results_str}
 
     Please analyze these results. Identify agreements and conflicts between metrics. Provide a final qualitative summary and a verdict.
+
+llm_judge:
+  system_prompt: |
+    You are an impartial evaluation judge for generated text.
+    Your role is to assess a generated text against a reference text according to a specific dimension.
+    Do not generate any new content. Only evaluate.
+    Provide reasoning in short sentences if needed, and return a JSON object as instructed.
+
+  dimensions:
+    coverage:
+      prompt: |
+        -------------------------------------------------------------------
+        evaluation task
+        -------------------------------------------------------------------
+        Ground Truth text:
+        -----------------
+        {ground_truth}
+        -----------------
+        Generated text:
+        -----------------
+        {generated}
+        -----------------
+        Evaluate how completely the generated text covers the reference text.
+        Score from 0.0 (no coverage) to 1.0 (full coverage).
+        Return JSON: {"score": <float>, "comment": "<reasoning>"}
+      few_shot_examples:
+        - reference: "The cat sat on the mat."
+          generated: "A cat is sitting on the mat."
+          score: 1.0
+          comment: "All key elements from the reference are present."
+        - reference: "The cat sat on the mat."
+          generated: "The dog sat on the mat."
+          score: 0.0
+          comment: "Incorrect fact: 'dog' instead of 'cat'."
+    faithfulness:
+      prompt: |
+        -------------------------------------------------------------------
+        evaluation task
+        -------------------------------------------------------------------
+        Ground Truth text:
+        -----------------
+        {ground_truth}
+        -----------------
+        {generated}
+        -----------------
+        Evaluate factual accuracy of the generated text STRICTLY against the reference.
+        Do not use external knowledge. If the generated text contains claims not present in or supported by the reference, penalize the score.
+        Score from 0.0 (completely unfaithful/hallucinated) to 1.0 (fully faithful).
+        Return JSON: {"score": <float>, "comment": "<reasoning>"}
+      few_shot_examples:
+        - reference: "The cat sat on the mat."
+          generated: "A cat is sitting on the mat."
+          score: 1.0
+          comment: "Facts are correct."
+        - reference: "The cat sat on the mat."
+          generated: "The dog sat on the mat."
+          score: 0.0
+          comment: "Incorrect fact: 'dog' instead of 'cat'."
+    clarity:
+      prompt: |
+        -------------------------------------------------------------------
+        evaluation task
+        -------------------------------------------------------------------
+        Ground Truth text:
+        -----------------
+        {ground_truth}
+        -----------------
+        Generated text:
+        -----------------
+        {generated}
+        -----------------
+        Evaluate readability and wording clarity of the generated text.
+        Score from 0.0 (unclear) to 1.0 (very clear).
+        Return JSON: {"score": <float>, "comment": "<reasoning>"}
+    coherence:
+      prompt: |
+        -------------------------------------------------------------------
+        evaluation task
+        -------------------------------------------------------------------
+        Ground Truth text:
+        -----------------
+        {ground_truth}
+        -----------------
+        Generated text:
+        -----------------
+        {generated}
+        -----------------
+        Evaluate logical flow and structure of the generated text.
+        Score from 0.0 (incoherent) to 1.0 (perfectly coherent).
+        Return JSON: {"score": <float>, "comment": "<reasoning>"}
+    relevance:
+      prompt  : |
+        -------------------------------------------------------------------
+        evaluation task
+        -------------------------------------------------------------------
+        Ground Truth text:
+        -----------------
+        {ground_truth}
+        -----------------
+        Generated text:
+        -----------------
+        {generated}
+        -----------------
+        Evaluate relevance of the generated text to the reference.
+        Score from 0.0 (not relevant) to 1.0 (very relevant).
+        Return JSON: {"score": <float>, "comment": "<reasoning>"} 
