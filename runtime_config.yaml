@@ -38,6 +38,48 @@ rouge2: {}
 rougeL: {}
 rougeLsum: {}
 
+# ============================================
+# NEW: Deterministic Evaluators Configuration
+# ============================================
+
+# NLI Entailment Evaluator
+entailment:
+  model_name: "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli"
+  device: "cpu"  # Use "cuda" for GPU acceleration
+  max_length: 512
+
+# NLI Contradiction Evaluator (hallucination detector)
+contradiction:
+  model_name: "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli"
+  device: "cpu"
+  max_length: 512
+
+# BERTScore Evaluator
+bertscore:
+  model_type: "microsoft/deberta-xlarge-mnli"
+  device: "cpu"
+  rescale_with_baseline: false
+
+# Token F1 Evaluator
+token_f1:
+  lowercase: true
+  use_stemming: false
+  remove_stopwords: false
+
+# Numerical Accuracy Evaluator
+numerical_accuracy:
+  tolerance: 0.01  # 1% relative tolerance
+  match_order: false
+  extract_percentages: true
+  extract_monetary: true
+
+# Entity Matching Evaluator
+entity_matching:
+  spacy_model: "en_core_web_sm"
+  match_strategy: "exact"  # or "fuzzy"
+  case_sensitive: false
+  use_weighted_scoring: false
+
 agent_config:
   base_url: "https://api.deepseek.com"
   api_key : "${DEEPSEEK_API_KEY}" # Or "${GOOGLE_API_KEY}" or "${OPENAI_API_KEY}"

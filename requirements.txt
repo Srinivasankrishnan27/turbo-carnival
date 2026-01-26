@@ -1,3 +1,4 @@
+# Core dependencies
 litellm==1.80.10
 httpx==0.28.1
 openai==2.13.0
@@ -7,7 +8,21 @@ rouge-score==0.1.2
 pydantic==2.7.0
 jinja2==3.1.2
 python-dotenv
-pytest==8.0.0
-pytest-asyncio==0.23.5
 pydantic-ai==1.41.0
 logfire==4.17.0
+
+# Testing
+pytest==8.0.0
+pytest-asyncio==0.23.5
+
+# NEW: Deterministic evaluators dependencies
+# NLI and BERTScore (transformers-based)
+transformers>=4.30.0
+torch>=2.0.0
+bert-score>=0.3.13
+
+# Entity matching (NER)
+spacy>=3.5.0
+
+# Token-level metrics (already have nltk via rouge-score, but explicit)
+nltk>=3.8.0

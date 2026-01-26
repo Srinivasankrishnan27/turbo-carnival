@@ -1,14 +1,37 @@
 evaluators:
+  # N-gram based metrics (lexical overlap)
   ngram:
     rouge1: 1.0
     rouge2: 1.0
     rougeL: 1.0
     rougeLsum: 1.0
+
+  # Semantic similarity
   semantic:
     embedding: 1.0
+
+  # LLM-as-Judge (qualitative assessment)
   llm_judge:
     coverage: 1.0
     faithfulness: 1.0
     clarity: 1.0
     coherence: 1.0
     relevance: 1.0
+
+  # NEW: NLI-based evaluators (deterministic logical inference)
+  nli:
+    entailment: 1.5       # Proves logical support from source
+    contradiction: 2.0    # Detects hallucinations (highest weight)
+
+  # NEW: Token-level similarity
+  similarity:
+    bertscore: 1.0        # Semantic similarity at token level
+
+  # NEW: Token overlap metrics
+  token_level:
+    token_f1: 0.5         # Basic word overlap (lower weight)
+
+  # NEW: Factual accuracy metrics
+  factual:
+    numerical_accuracy: 1.0   # Number/date verification
+    entity_matching: 1.0      # Named entity verification
